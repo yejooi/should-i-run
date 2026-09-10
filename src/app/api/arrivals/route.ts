@@ -123,9 +123,16 @@ function mockResponse(station: string, lineHint: string[]): ArrivalsApiResponse 
         const sec = base + i * (200 + Math.floor(rng() * 120)) + dirIdx * 40;
         const dest =
           MOCK_DEST[subwayId]?.[dirIdx] ?? (dirIdx === 0 ? "상행종착" : "하행종착");
+        const isLoop = subwayId === "1002";
         arrivals.push({
           subwayId,
-          updnLine: dirIdx === 0 ? "상행" : "하행",
+          updnLine: isLoop
+            ? dirIdx === 0
+              ? "내선"
+              : "외선"
+            : dirIdx === 0
+              ? "상행"
+              : "하행",
           trainLineNm: `${dest}행 - ${dest}방면`,
           bstatnNm: dest,
           barvlDt: sec,
@@ -162,7 +169,7 @@ const MOCK_DEST: Record<string, [string, string]> = {
   "1001": ["광운대", "인천"],
   "1002": ["성수", "신도림"],
   "1003": ["대화", "오금"],
-  "1004": ["당고개", "오이도"],
+  "1004": ["불암산", "오이도"],
   "1005": ["방화", "하남검단산"],
   "1006": ["응암", "신내"],
   "1007": ["장암", "석남"],

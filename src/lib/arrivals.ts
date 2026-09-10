@@ -38,6 +38,16 @@ function anchorStations(raw: RawArrival, lineStations: string[]): string[] {
   return [...set];
 }
 
+/** trainLineNm 의 "○○방면" 에서 진행 방향을 가리키는 역을 뽑는다. */
+function bearingAnchor(raw: RawArrival, lineStations: string[]): string | null {
+  const m = raw.trainLineNm.match(/([가-힣A-Za-z0-9().·]+?)\s*방면/);
+  if (!m) return null;
+  const name = m[1];
+  if (lineStations.includes(name)) return name;
+  const hit = lineStations.find((s) => name.startsWith(s) || s.startsWith(name));
+  return hit && Math.abs(hit.length - name.length) <= 2 ? hit : null;
+}
+
 /**
  * 이 도착 열차가 leg(내가 타야 할 구간)의 방면과 일치하는지.
  */
@@ -47,38 +57,34 @@ export function matchesLegDirection(raw: RawArrival, leg: RouteLeg): boolean {
   if (!line) return true; // 노선 데이터 없으면 통과
 
   const s = line.stations;
+  const n = s.length;
   const boardIdx = s.indexOf(leg.boardStation);
   const towardIdx = s.indexOf(leg.towardStation);
   if (boardIdx < 0 || towardIdx < 0) return true;
 
-  const n = s.length;
   const inc = towardIdx === (boardIdx + 1) % n; // 우리 진행이 인덱스 증가 방향인가 (2호선: 내선)
-  const anchors = anchorStations(raw, s);
-
-  if (anchors.length === 0) {
-    // 방면 앵커 역을 못 읽음 → updnLine 문자열로 완화 매칭
-    if (line.loop) {
-      if (/내선/.test(raw.updnLine)) return inc;
-      if (/외선/.test(raw.updnLine)) return !inc;
-    } else {
-      // 비순환선의 상/하행은 노선마다 기준이 달라 신뢰도가 낮다 → 판단 보류(노출)
-    }
-    return true;
-  }
 
   if (line.loop) {
-    // 순환선: 앵커 역이 우리 진행 방향으로 더 가까우면(반 바퀴 이내) 우리 방면.
-    const fwd = (from: number, to: number, dir: 1 | -1) =>
-      dir === 1 ? (to - from + n) % n : (from - to + n) % n;
-    const ourDir: 1 | -1 = inc ? 1 : -1;
-    return anchors.some((a) => {
-      const ai = s.indexOf(a);
-      if (ai < 0 || ai === boardIdx) return false;
-      return fwd(boardIdx, ai, ourDir) <= fwd(boardIdx, ai, ourDir === 1 ? -1 : 1);
-    });
+    // 1) updnLine 이 내선/외선을 명시하면 확정 (서울 2호선 실데이터는 여기서 끝남)
+    if (/내선/.test(raw.updnLine)) return inc;
+    if (/외선/.test(raw.updnLine)) return !inc;
+    // 2) "○○방면" 역이 우리 진행 방향으로 더 가까우면 우리 방면
+    //    (bstatnNm 은 순환선에서 양방향 모두 존재할 수 있어 신뢰 불가)
+    const bearing = bearingAnchor(raw, s);
+    if (bearing) {
+      const bi = s.indexOf(bearing);
+      const fwd = (dir: 1 | -1) =>
+        dir === 1 ? (bi - boardIdx + n) % n : (boardIdx - bi + n) % n;
+      const ourDir: 1 | -1 = inc ? 1 : -1;
+      return fwd(ourDir) < fwd(ourDir === 1 ? -1 : 1);
+    }
+    return true; // 판단 불가 → 노출
   }
 
+  // 비순환선: bstatnNm / "○○방면" 이 board 기준 우리 방향(인덱스 증감)에 있으면 일치
   const dir = Math.sign(towardIdx - boardIdx);
+  const anchors = anchorStations(raw, s);
+  if (anchors.length === 0) return true;
   return anchors.some((a) => {
     const ai = s.indexOf(a);
     return ai >= 0 && Math.sign(ai - boardIdx) === dir;
