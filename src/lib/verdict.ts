@@ -20,8 +20,8 @@ export function judge(
   if (pool.length === 0) {
     return {
       kind: "relax",
-      headline: "도착 정보 없음",
-      detail: "이 역의 실시간 열차 정보를 찾지 못했어요. 전광판을 확인하세요.",
+      headline: "정보 없음",
+      detail: "실시간 열차 정보를 찾지 못했어요 — 역 전광판을 확인하세요.",
       slackMin: 0,
     };
   }
@@ -46,26 +46,22 @@ export function judge(
 
   if (slackMin < 0) {
     kind = next ? "missed" : "run";
-    headline = next ? "이번 건 아슬아슬" : "지금 전력질주";
+    headline = next ? "아깝다" : "뛰어!";
     detail = next
-      ? `다음 열차까지 ${etaMin}분, 도보 ${walkMin}분. 뛰어도 아슬아슬해요.`
-      : `${etaMin}분 뒤 도착인데 도보 ${walkMin}분. 무조건 뛰어야 합니다.`;
+      ? `도보 ${walkMin}분 · 열차 ${etaMin}분 후 도착 — 이건 놓쳐요, 다음 걸 노리세요.`
+      : `도보 ${walkMin}분 · 열차 ${etaMin}분 후 도착 — 지금 뛰어도 아슬아슬합니다.`;
   } else if (slackMin < 1.5) {
     kind = "run";
-    headline = "뛰어야 탑니다";
-    detail = `${etaMin}분 뒤 도착. 도보 ${walkMin}분이라 여유가 거의 없어요.`;
+    headline = "뛰어!";
+    detail = `도보 ${walkMin}분 · 열차 ${etaMin}분 후 도착 — 뛰면 탈 수 있습니다.`;
   } else if (slackMin < 4) {
     kind = "hurry";
-    headline = "빠르게 걸으면 탑니다";
-    detail = `${etaMin}분 뒤 도착. 도보 ${walkMin}분, 약 ${Math.round(
-      slackMin,
-    )}분 여유.`;
+    headline = "빨리!";
+    detail = `도보 ${walkMin}분 · 열차 ${etaMin}분 후 도착 — 서두르면 여유 있게 탑니다.`;
   } else {
     kind = "relax";
-    headline = "여유 있어요";
-    detail = `${etaMin}분 뒤 도착. 도보 ${walkMin}분, 약 ${Math.round(
-      slackMin,
-    )}분 여유.`;
+    headline = "여유";
+    detail = `도보 ${walkMin}분 · 열차 ${etaMin}분 후 도착 — 천천히 가도 됩니다.`;
   }
 
   return {

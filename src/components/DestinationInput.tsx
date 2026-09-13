@@ -17,7 +17,7 @@ export default function DestinationInput({
   onSelect,
   onClear,
   label = "목적지",
-  placeholder = "목적지 역 이름 (예: 강남, 홍대, 롯데월드)",
+  placeholder = "역 이름 (예: 강남, 홍대, 롯데월드)",
 }: Props) {
   const [text, setText] = useState("");
   const [open, setOpen] = useState(false);
@@ -46,15 +46,15 @@ export default function DestinationInput({
 
   if (value) {
     return (
-      <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-surface px-4 py-3">
-        <div className="min-w-0">
-          <div className="text-xs text-dim">{label}</div>
-          <div className="truncate text-lg font-semibold">{value}</div>
-        </div>
+      <div className="flex items-center gap-2.5 rounded-[10px] border border-chip-line bg-chip px-3.5 py-3">
+        <span className="font-digital text-[9px] tracking-[.12em] text-dim">
+          {label === "목적지" ? "TO" : label.toUpperCase()}
+        </span>
+        <span className="font-display truncate text-[20px] leading-none text-accent">{value}</span>
         <button
           type="button"
           onClick={onClear}
-          className="shrink-0 rounded-lg border border-border px-3 py-1.5 text-sm text-dim transition-colors hover:text-fg"
+          className="ml-auto shrink-0 rounded-full border border-chip-line px-2.5 py-1 text-[11px] text-dim transition-colors hover:text-ink"
         >
           변경
         </button>
@@ -95,14 +95,14 @@ export default function DestinationInput({
         aria-expanded={open && suggestions.length > 0}
         aria-controls={listId}
         aria-autocomplete="list"
-        className="w-full rounded-xl border border-border bg-surface px-4 py-3.5 text-base outline-none placeholder:text-faint focus:border-accent"
+        className="font-display w-full rounded-[10px] border border-chip-line bg-chip px-3.5 py-3 text-[18px] text-ink outline-none placeholder:font-sans placeholder:text-[13px] placeholder:text-faint focus:border-accent"
       />
 
       {open && suggestions.length > 0 && (
         <ul
           id={listId}
           role="listbox"
-          className="absolute z-20 mt-1.5 max-h-72 w-full overflow-auto rounded-xl border border-border bg-surface py-1 shadow-lg"
+          className="absolute z-20 mt-1.5 max-h-72 w-full overflow-auto rounded-[10px] border border-chip-line bg-chip py-1 shadow-lg"
         >
           {suggestions.map((s, i) => (
             <li key={s.station} role="option" aria-selected={i === active}>
@@ -110,17 +110,16 @@ export default function DestinationInput({
                 type="button"
                 onMouseEnter={() => setActive(i)}
                 onClick={() => choose(s)}
-                className={`flex w-full items-baseline justify-between gap-3 px-4 py-2.5 text-left ${
-                  i === active ? "bg-surface-2" : ""
-                }`}
+                className="flex w-full items-baseline justify-between gap-3 px-3.5 py-2.5 text-left"
+                style={{ background: i === active ? "var(--row-bg)" : undefined }}
               >
-                <span className="font-medium">
+                <span className="font-display text-[15px] text-ink">
                   {s.station}
                   {s.via && s.via !== s.station && (
-                    <span className="ml-1.5 text-xs text-faint">· {s.via}</span>
+                    <span className="font-sans ml-1.5 text-[11px] text-faint">· {s.via}</span>
                   )}
                 </span>
-                <span className="shrink-0 text-xs text-dim">
+                <span className="font-digital shrink-0 text-[10px] text-dim">
                   {s.lineNames.join(" · ")}
                 </span>
               </button>

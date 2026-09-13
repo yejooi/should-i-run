@@ -41,3 +41,38 @@ export const STATION_API_NAME: Record<string, string> = {
 export function toApiStationName(name: string): string {
   return STATION_API_NAME[name] ?? name;
 }
+
+// 서울 수도권 노선 공식 색 (lines.json 의 lineKey 기준). 전광판 배지·마퀴·액센트에 사용.
+export const LINE_COLOR: Record<string, string> = {
+  "1": "#0052A4",
+  "2": "#00A84D",
+  "3": "#EF7C1C",
+  "4": "#00A5DE",
+  "5": "#996CAC",
+  "5-마천": "#996CAC",
+  "6": "#CD7C2F",
+  "7": "#747F00",
+  "8": "#E6186C",
+  "9": "#BDB092",
+  신분당: "#D4003B",
+  수인분당: "#F5A200",
+  경의중앙: "#77C4A3",
+  우이신설: "#B0CE18",
+};
+
+export function lineColor(lineKey: string): string {
+  return LINE_COLOR[lineKey] ?? "#6B7280";
+}
+
+// 전광판 배지에 넣을 짧은 라벨 (숫자 노선은 숫자, 이름 노선은 앞 글자).
+const LINE_BADGE: Record<string, string> = {
+  "5-마천": "5",
+  신분당: "신",
+  수인분당: "수",
+  경의중앙: "경",
+  우이신설: "우",
+};
+
+export function lineBadgeLabel(lineKey: string): string {
+  return LINE_BADGE[lineKey] ?? lineKey;
+}

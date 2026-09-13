@@ -34,3 +34,7 @@ next-env.d.ts
 # next 16 auto-generated agent rules (regenerated on dev/build)
 /AGENTS.md
 /CLAUDE.md
+
+# Claude Design handoff bundle (참고용 로컬 산출물, 리포에는 안 넣음)
+*-handoff.zip
+/design/
